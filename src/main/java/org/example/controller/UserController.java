@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -16,38 +15,33 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // Create a new user
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.ok(createdUser);
+    @PostMapping("/signup")
+    public ResponseEntity<User> signup(@RequestBody User user) {
+        User newUser = userService.signup(user);
+        return ResponseEntity.ok(newUser);
     }
 
-    // Get a user by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@RequestParam String username, @RequestParam String password) {
+        Optional<User> loggedInUser = userService.login(username, password);
+        return loggedInUser.map(ResponseEntity::ok).orElse(ResponseEntity.badRequest().build());
     }
 
-    // Get all users
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
-    }
-
-    // Update an existing user
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
         User updatedUser = userService.updateUser(id, user);
-        return updatedUser != null ? ResponseEntity.ok(updatedUser) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(updatedUser);
     }
 
-    // Delete a user by ID
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search/{id}")
+    public ResponseEntity<User> searchById(@PathVariable Long id) {
+        Optional<User> user = userService.searchById(id);
+        return user.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }
